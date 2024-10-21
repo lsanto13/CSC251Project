@@ -7,31 +7,76 @@ public class Project_luis_santosayala {
 
     public static void main(String[] args) {
         ArrayList<Policy> policies = new ArrayList<>();
-        
+        int smokerCount = 0;
+        int nonSmokerCount = 0;
+
         try {
             // Read from the PolicyInformation.txt file
             File file = new File("PolicyInformation.txt");
             Scanner fileScanner = new Scanner(file);
-            
+
             // Read each line and create Policy objects
             while (fileScanner.hasNextLine()) {
-                // Extract data from each line based on the file format
+                // Defensive check to make sure file has enough lines for each policy
+                if (!fileScanner.hasNextLine()) break;
                 String policyNumber = fileScanner.nextLine();
+
+                if (!fileScanner.hasNextLine()) break;
                 String providerName = fileScanner.nextLine();
+
+                if (!fileScanner.hasNextLine()) break;
                 String firstName = fileScanner.nextLine();
+
+                if (!fileScanner.hasNextLine()) break;
                 String lastName = fileScanner.nextLine();
-                int age = Integer.parseInt(fileScanner.nextLine());
+
+                if (!fileScanner.hasNextLine()) break;
+                String ageString = fileScanner.nextLine();
+                int age = 0;
+                try {
+                    age = Integer.parseInt(ageString);  // Attempt to parse age as an integer
+                } catch (NumberFormatException e) {
+                    System.out.println("Error parsing age for policyholder " + firstName + " " + lastName);
+                    continue;  // Skip to the next policy if there's an error
+                }
+
+                if (!fileScanner.hasNextLine()) break;
                 String smokingStatus = fileScanner.nextLine();
-                double heightInInches = Double.parseDouble(fileScanner.nextLine());
-                double weightInPounds = Double.parseDouble(fileScanner.nextLine());
+
+                if (!fileScanner.hasNextLine()) break;
+                String heightString = fileScanner.nextLine();
+                double heightInInches = 0.0;
+                try {
+                    heightInInches = Double.parseDouble(heightString);  // Attempt to parse height as a double
+                } catch (NumberFormatException e) {
+                    System.out.println("Error parsing height for policyholder " + firstName + " " + lastName);
+                    continue;  // Skip to the next policy if there's an error
+                }
+
+                if (!fileScanner.hasNextLine()) break;
+                String weightString = fileScanner.nextLine();
+                double weightInPounds = 0.0;
+                try {
+                    weightInPounds = Double.parseDouble(weightString);  // Attempt to parse weight as a double
+                } catch (NumberFormatException e) {
+                    System.out.println("Error parsing weight for policyholder " + firstName + " " + lastName);
+                    continue;  // Skip to the next policy if there's an error
+                }
 
                 // Create a Policy object with the extracted data
                 Policy policy = new Policy(policyNumber, providerName, firstName, lastName, age, smokingStatus, heightInInches, weightInPounds);
-                
+
                 // Add the policy object to the ArrayList
                 policies.add(policy);
+
+                // Increment smoker/non-smoker counters
+                if (smokingStatus.equalsIgnoreCase("smoker")) {
+                    smokerCount++;
+                } else {
+                    nonSmokerCount++;
+                }
             }
-            
+
             fileScanner.close();
 
             // Display all policies
@@ -42,86 +87,20 @@ public class Project_luis_santosayala {
                 System.out.println("Policyholder's First Name: " + policy.getFirstName());
                 System.out.println("Policyholder's Last Name: " + policy.getLastName());
                 System.out.println("Policyholder's Age: " + policy.getAge());
-                System.out.println("Policyholder's Smoking Status: " + policy.getSmokingStatus());
-                System.out.printf("Policyholder's Height (in inches): %.2f\n", policy.getHeightInInches());
-                System.out.printf("Policyholder's Weight (in pounds): %.2f\n", policy.getWeightInPounds());
+                System.out.println("Policyholder's Smoking Status (smoker/non-smoker): " + policy.getSmokingStatus());
+                System.out.printf("Policyholder's Height: %.1f inches\n", policy.getHeightInInches());
+                System.out.printf("Policyholder's Weight: %.1f pounds\n", policy.getWeightInPounds());
                 System.out.printf("Policyholder's BMI: %.2f\n", policy.calculateBMI());
-                System.out.printf("Insurance Policy Price: $%.2f\n", policy.calculatePrice());
+                System.out.printf("Policy Price: $%.2f\n", policy.calculatePrice());
             }
+
+            // Display smoker/non-smoker statistics
+            System.out.println("\nThe number of policies with a smoker is: " + smokerCount);
+            System.out.println("The number of policies with a non-smoker is: " + nonSmokerCount);
 
         } catch (FileNotFoundException e) {
             System.out.println("Error: PolicyInformation.txt file not found.");
             e.printStackTrace();
         }
-    }
-}
-
-class Policy {
-    private String policyNumber;
-    private String providerName;
-    private String firstName;
-    private String lastName;
-    private int age;
-    private String smokingStatus;
-    private double heightInInches;
-    private double weightInPounds;
-
-    // Constructor
-    public Policy(String policyNumber, String providerName, String firstName, String lastName, int age, String smokingStatus, double heightInInches, double weightInPounds) {
-        this.policyNumber = policyNumber;
-        this.providerName = providerName;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.age = age;
-        this.smokingStatus = smokingStatus;
-        this.heightInInches = heightInInches;
-        this.weightInPounds = weightInPounds;
-    }
-
-    // Getters for policy attributes
-    public String getPolicyNumber() {
-        return policyNumber;
-    }
-
-    public String getProviderName() {
-        return providerName;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public String getSmokingStatus() {
-        return smokingStatus;
-    }
-
-    public double getHeightInInches() {
-        return heightInInches;
-    }
-
-    public double getWeightInPounds() {
-        return weightInPounds;
-    }
-
-    // Method to calculate BMI
-    public double calculateBMI() {
-        return (weightInPounds / (heightInInches * heightInInches)) * 703;
-    }
-
-    // Method to calculate price (you can define your own logic here)
-    public double calculatePrice() {
-        double basePrice = 500;  // Example base price
-        if (smokingStatus.equalsIgnoreCase("smoker")) {
-            basePrice += 200;  // Higher price for smokers
-        }
-        return basePrice;
     }
 }
